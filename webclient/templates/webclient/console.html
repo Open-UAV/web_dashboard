@@ -3,16 +3,15 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<script type="text/javascript" src="https://label.ag/static/scripts/eventemitter2.min.js"></script>
-<script type="text/javascript" src="https://label.ag/static/scripts//roslib.min.js"></script>
+<script type="text/javascript" src="https://openuav.us/scripts/eventemitter2.js"></script>
+<script type="text/javascript" src="https://openuav.us/scripts/roslib.min.js"></script>
 
 <script type="text/javascript" type="text/javascript">
   // Connecting to ROS
   // -----------------
 
 
-websocket_url_str = 'wss://label.ag:{{port_prefix}}090';
-gzweb_url_str = 'https://label.ag:{{port_prefix}}86';
+websocket_url_str = 'wss://{{rosDomainName}}:8030';
 var ros = new ROSLIB.Ros({
     url : websocket_url_str
   });
@@ -83,7 +82,10 @@ listener[{{ forloop.counter|add:"-1"}}].subscribe(function(message) {
 
 </svg>
 
-<iframe id='gzweb-frame' src='' width="1600px" height="1200px" scrolling=yes ></iframe>
-<iframe id='video-1' src='http://label.ag:{{port_prefix}}002/stream?topic=/uav_1_camera/image_raw_front'></iframe>
+{% for _ in range %}
+<iframe id="video-1{{forloop.counter}}" src="https://{{viewDomainName}}/stream?topic=/uav_{{forloop.counter}}_camera/image_raw_front" width="768px" height="480px"  frameborder="0"></iframe>
+{% endfor %}
+
+
 </body>
 </html>

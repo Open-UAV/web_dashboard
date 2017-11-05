@@ -400,11 +400,21 @@ def cleanUpAndFixImages(request):
 
 @csrf_exempt
 def simulate(request):
-    num_uavs = request.GET['num_uavs']
-    port_prefix=request.GET['port_prefix']
-    results = ansible.runner.Runner(pattern='172.19.0.1',module_name='command', module_args='sh /home/jdas/open-uav/Firmware/testScripts/ansible-openuav-launch.sh ' + num_uavs + ' ' + port_prefix,).run()
+    viewIP = '10.17.0.13'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-2.openuav.us'
+    num_uavs='2'
+    results = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/samples/leader-follower/simulation:/simulation openuav-swarm-functional /simulation/run_this.sh').run()
     #return JsonResponse(results)
-    return HttpResponse(render(request, 'webclient/console.html', {'port_prefix' : port_prefix, 'num_uavs' : num_uavs})) 
+    return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+
+@csrf_exempt
+def console(request):
+    viewIP = '10.17.0.13'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-2.openuav.us'
+    num_uavs='2'
+    return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 
 '''
