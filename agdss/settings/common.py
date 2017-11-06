@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-
+import django
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+import socket
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -25,8 +27,7 @@ SECRET_KEY = 'q82m6os5(_m4s7tabkfsz1y90dsnz1q(_c^+u&zs+ffftgs*2$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -40,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -82,11 +82,11 @@ WSGI_APPLICATION = 'agdss.wsgi.application'
 DATABASES = {
     'default': {
             'ENGINE': 'django.db.backends.postgresql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'agdss',                      # Or path to database file if using sqlite3.
+            'NAME': 'airborne',                      # Or path to database file if using sqlite3.
             # The following settings are not used with sqlite3:
             'USER': 'aguser',
             'PASSWORD': 'aguser',
-            'HOST': 'db', #'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
+            'HOST': '172.17.0.4', #'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
             'PORT': '5432',                      # 5432 is default, specified here for ease of viewing
         }
 }
@@ -133,9 +133,10 @@ LOGIN_REDIRECT_URL = '/webclient'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = "/home/jdas/Dropbox/Research/UPenn/kumar-prec-ag"
-#STATIC_ROOT = "/home/sdcunha/Dropbox/kumar-prec-ag"
-
-NOTEBOOK_ARGUMENTS = [
-        '--config=jupyter_notebook_config.py',
-        ]
+STATIC_ROOT = os.path.join(BASE_DIR, "static-root/")
+LABEL_FOLDER_NAME = "labels/"
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+os.environ['HTTPS'] = "on"
+os.environ['wsgi.url_scheme'] = 'https'
+SECURE_SSL_REDIRECT = True

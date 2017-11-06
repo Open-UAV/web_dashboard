@@ -13,6 +13,9 @@ urlpatterns = [
     url(r'^label$', views.label, name='label'),
     url(r'^results$', views.results, name='results'),
     url(r'^view_label$', views.view_label, name='view_label'),
+    url(r'^simulate$', views.simulate, name='simulate'),
+    url(r'^console$', views.console, name='console'),
+
 
     #GET/POST URLs
 

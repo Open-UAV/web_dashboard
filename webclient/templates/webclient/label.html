@@ -81,7 +81,8 @@
                         getNewImage();
                     },
                     error : function(xhr,errmsg,err) {
-                        alert(xhr.status + ": " + xhr.responseText);
+                        alert(xhr.status + ": 2" + xhr.responseText);
+
                         labelsDrawn = prevLabels;
 
                     }
@@ -237,7 +238,7 @@
                 },
 
                 error: function (xhr, errmsg, err) {
-                    alert(xhr.status + ": " + xhr.responseText);
+                    alert(xhr.status + ": getNewImage" + xhr.responseText);
                 }
             });
         }

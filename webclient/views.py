@@ -6,7 +6,7 @@ import subprocess
 import os
 import ansible.runner
 from django.shortcuts import render
-
+import uuid 
 
 import re
 import sys
@@ -400,20 +400,21 @@ def cleanUpAndFixImages(request):
 
 @csrf_exempt
 def simulate(request):
+    uuid_str=str(uuid.uuid4())
     viewIP = '10.17.0.13'
     viewDomainName='view-3.openuav.us'
     rosDomainName='ros-2.openuav.us'
-    num_uavs='2'
-    results = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/samples/leader-follower/simulation:/simulation openuav-swarm-functional /simulation/run_this.sh').run()
+    num_uavs='3'
+    results = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/samples/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
     #return JsonResponse(results)
-    return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+    return HttpResponse(render(request, 'webclient/console.html', {'uuid' : uuid_str,'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 @csrf_exempt
 def console(request):
     viewIP = '10.17.0.13'
     viewDomainName='view-3.openuav.us'
     rosDomainName='ros-2.openuav.us'
-    num_uavs='2'
+    num_uavs='3'
     return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 
