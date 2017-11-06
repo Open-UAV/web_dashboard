@@ -11,29 +11,17 @@ urlpatterns = [
                   #Page URLs
     url(r'^$', views.index, name='label_index'),
     url(r'^label$', views.label, name='label'),
-    url(r'^results$', views.results, name='results'),
-    url(r'^view_label$', views.view_label, name='view_label'),
     url(r'^simulate$', views.simulate, name='simulate'),
     url(r'^console$', views.console, name='console'),
+    url(r'^upload$', views.upload, name='upload'),
 
 
     #GET/POST URLs
 
     #url(r'^purge$', 'webclient.views.purge'),
-    url(r'^addImage$', 'webclient.views.addImage'),
-    url(r'^cleanUpAndFixImages$', 'webclient.views.cleanUpAndFixImages'),
-    url(r'^updateImage$', 'webclient.views.updateImage'),
     url(r'^getInfo$', 'webclient.views.getInfo'),
-    url(r'^getNewImage$', 'webclient.views.getNewImage'),
-    url(r'^convertAll$', 'webclient.views.convertAll'),
-    url(r'^unlabeledImages$', 'webclient.views.unlabeledImages'),
-    url(r'^numImageLabels$', 'webclient.views.numImageLabels'),
-    url(r'^combineAllImages$', 'webclient.views.combineAllImages'),
-    url(r'^calculateEntropyMap$', 'webclient.views.calculateEntropyMap'),
     url(r'^applyLabels$', 'webclient.views.applyLabels'),
     url(r'^loadLabels$', 'webclient.views.loadLabels'),
-    url(r'^fix_label_location$', 'webclient.views.fix_label_location'),
-    url(r'^print_label_data', 'webclient.views.print_label_data'),
 
 
     url(r'^get_overlayed_image/(?P<image_label_id>[0-9]*)$', 'webclient.views.get_overlayed_image'),

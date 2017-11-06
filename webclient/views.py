@@ -7,6 +7,9 @@ import os
 import ansible.runner
 from django.shortcuts import render
 import uuid 
+from django.shortcuts import render
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 import re
 import sys
@@ -417,6 +420,24 @@ def console(request):
     num_uavs='3'
     return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
+
+@csrf_exempt
+def upload(request):
+    uuid_str=str(uuid.uuid4())
+    viewIP = '10.17.0.13'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-2.openuav.us'
+    num_uavs='3'
+
+    if request.method == 'POST' and request.FILES['simulation']:
+        myfile = request.FILES['simulation']
+        fs = FileSystemStorage()
+        filename = fs.save(myfile.name, myfile)
+        uploaded_file_url = fs.url(filename)
+        resultsUpload = ansible.runner.Runner(pattern='all',module_name='unarchive', module_args={'src' : '/notebooks/agdss-1/' + filename,'dest' : '/home/jdas/playground'}).run()
+        resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+	return JsonResponse(resultsSimLaunch)
+    return render(request, 'webclient/upload.html')
 
 '''
 Request: POST
