@@ -17,7 +17,7 @@ import io
 import urllib
 from cStringIO import StringIO
 from PIL import Image as PILImage
-
+import time 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, MultipleObjectsReturned
@@ -406,7 +406,7 @@ def simulate(request):
     uuid_str=str(uuid.uuid4())
     viewIP = '10.17.0.13'
     viewDomainName='view-3.openuav.us'
-    rosDomainName='ros-2.openuav.us'
+    rosDomainName='ros-3.openuav.us:443'
     num_uavs='3'
     results = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/samples/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
     #return JsonResponse(results)
@@ -414,11 +414,19 @@ def simulate(request):
 
 @csrf_exempt
 def console(request):
-    viewIP = '10.17.0.13'
+    viewIP = '10.17.0.13:443'
     viewDomainName='view-3.openuav.us'
-    rosDomainName='ros-2.openuav.us'
+    rosDomainName='ros-3.openuav.us'
     num_uavs='3'
-    return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+    return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+
+def dev_console(request):
+    viewIP = '10.17.0.12:443'
+    viewDomainName='view-2.openuav.us'
+    rosDomainName='ros-2.openuav.us'
+    num_uavs='2'
+    return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+
 
 
 @csrf_exempt
@@ -426,7 +434,7 @@ def upload(request):
     uuid_str=str(uuid.uuid4())
     viewIP = '10.17.0.13'
     viewDomainName='view-3.openuav.us'
-    rosDomainName='ros-2.openuav.us'
+    rosDomainName='ros-3.openuav.us:443'
     num_uavs='3'
 
     if request.method == 'POST' and request.FILES['simulation']:
@@ -435,8 +443,11 @@ def upload(request):
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
         resultsUpload = ansible.runner.Runner(pattern='all',module_name='unarchive', module_args={'src' : '/notebooks/agdss-1/' + filename,'dest' : '/home/jdas/playground'}).run()
-        resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
-	return JsonResponse(resultsSimLaunch)
+        resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+	#time.sleep(1)
+	return HttpResponse(str(resultsSimLaunch) + '<br/><a href="https://play.openuav.us/webclient/console">Wait 10 seconds for monitoring services to start, and click to open web viewer</a>')
+	#return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName, 'playgroundResponse' : str(resultsSimLaunch)}))
+
     return render(request, 'webclient/upload.html')
 
 '''

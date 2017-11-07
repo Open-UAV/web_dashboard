@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^simulate$', views.simulate, name='simulate'),
     url(r'^console$', views.console, name='console'),
     url(r'^upload$', views.upload, name='upload'),
+    url(r'^dev_console$', views.dev_console, name='dev_console'),
 
 
     #GET/POST URLs
