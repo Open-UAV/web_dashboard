@@ -417,7 +417,7 @@ def console(request):
     viewIP = '10.17.0.13:443'
     viewDomainName='view-3.openuav.us'
     rosDomainName='ros-3.openuav.us'
-    num_uavs='3'
+    num_uavs='6'
     return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 def dev_console(request):
@@ -428,6 +428,37 @@ def dev_console(request):
     return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 
+@csrf_exempt
+def dev_hook(request):
+    uuid_str=str(uuid.uuid4())
+    viewIP = '10.17.0.13'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-3.openuav.us:443'
+    num_uavs='3'
+    _payload = request.POST["payload"]
+    payload = json.loads(_payload)
+    repo_str = payload["repository"]
+    html_url = repo_str["url"]
+    pushed_at = payload["after"]
+    owner = repo_str["owner"]
+    name = owner["login"]	
+    folder_name = '/home/jdas/git-samples-' + str(name) + '-' + str(pushed_at)
+    resultsPull = ansible.runner.Runner(pattern='all',module_name='git', module_args={'repo' : 'https://github.com/Open-UAV/samples', 'dest' : folder_name, 'update' : 'yes'}).run()
+    resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v '+ folder_name +'/leader-follower/simulation:/simulation --name=' + name + '-' + uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+    #resultScore = ansible.runner.Runner(pattern='all',module_name='stat',module_args={'path' : '/home/jdas/git-samples/leader-follower/simulation/outputs/average_score'}).run()
+    return HttpResponse(resultsSimLaunch)
+@csrf_exempt
+def hook(request):
+    uuid_str=str(uuid.uuid4())
+    viewIP = '10.17.0.13'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-3.openuav.us:443'
+    num_uavs='3'
+
+    resultsPull = ansible.runner.Runner(pattern='all',module_name='git', module_args={'repo' : 'https://github.com/Open-UAV/samples/', 'dest' : '/home/jdas/git-samples', 'update' : 'yes'}).run()
+    resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v /home/jdas/git-samples/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+    resultScore = ansible.runner.Runner(pattern='all',module_name='stat',module_args={'path' : '/home/jdas/git-samples/leader-follower/simulation/outputs/average_score'}).run()
+    return HttpResponse(str(resultScore))
 
 @csrf_exempt
 def upload(request):
@@ -445,8 +476,8 @@ def upload(request):
         resultsUpload = ansible.runner.Runner(pattern='all',module_name='unarchive', module_args={'src' : '/notebooks/agdss-1/' + filename,'dest' : '/home/jdas/playground'}).run()
         resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
 	#time.sleep(1)
-	return HttpResponse(str(resultsSimLaunch) + '<br/><a href="https://play.openuav.us/webclient/console">Wait 10 seconds for monitoring services to start, and click to open web viewer</a>')
-	#return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName, 'playgroundResponse' : str(resultsSimLaunch)}))
+	#return HttpResponse(str(resultsSimLaunch) + '<br/><a href="https://play.openuav.us/webclient/console">Wait 10 seconds for monitoring services to start, and click to open web viewer</a>')
+	return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName, 'playgroundResponse' : str(resultsSimLaunch)}))
 
     return render(request, 'webclient/upload.html')
 

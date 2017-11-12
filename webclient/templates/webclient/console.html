@@ -42,8 +42,8 @@ ros.on('error', function(error) {
   // Subscribing to a Topic
   // ----------------------
 listener = ["1" , "2", "3", "4","5", "6", "7","8","9"]
-OFF = 10
-SCALE = 25
+OFF = 200
+SCALE = 5
 for (i = 1; i < 10; i++) { 
    listener[i-1]  = new ROSLIB.Topic({
     ros : ros,
@@ -51,9 +51,8 @@ for (i = 1; i < 10; i++) {
     messageType : 'geometry_msgs/PoseStamped'
   });
 }
-X_OFFSET=10
-ALT_SCL=1.7
-Y_OFFSET = 10
+X_OFFSET=200
+Y_OFFSET = 200
 
 {% for _ in range %}
 listener[{{ forloop.counter|add:"-1"}}].subscribe(function(message) {

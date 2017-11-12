@@ -15,6 +15,8 @@ urlpatterns = [
     url(r'^console$', views.console, name='console'),
     url(r'^upload$', views.upload, name='upload'),
     url(r'^dev_console$', views.dev_console, name='dev_console'),
+    url(r'^hook$', views.hook, name='hook'),
+    url(r'^dev_hook$', views.dev_hook, name='dev_hook'),
 
 
     #GET/POST URLs
