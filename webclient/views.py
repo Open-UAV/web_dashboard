@@ -164,17 +164,8 @@ def loadLabels(request):
     label_list = []
     sourceType = ''
     categoryType = ''
-    # sourceTypeList = ImageSourceType.objects.all().filter(description="human");
-    # if (sourceTypeList):
-    #     sourceType = sourceTypeList[0]
-    # else:
-    #     sourceType = ImageSourceType(description="human", pub_date=datetime.now())
-    #     sourceType.save()
 
     image = Image.objects.all().filter(name=request.GET['image_name'], path=request.GET['path'])
-    # if not image:
-    #     parentImage_ = Image(name=parentImage_, path='/static/tag_images/',description='test generation at serverside', source=sourceType, pub_date=datetime.now())
-    #     parentImage_.save()
     if not image:
         return HttpResponseBadRequest("No such image found")
     label_list = ImageLabel.objects.all().filter(parentImage=image[0]).order_by('pub_date').last()
@@ -411,20 +402,55 @@ def simulate(request):
     results = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -it --net=openuav-net --ip=10.17.0.13 -v /home/jdas/samples/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
     #return JsonResponse(results)
     return HttpResponse(render(request, 'webclient/console.html', {'uuid' : uuid_str,'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+@csrf_exempt
+def unstable_console(request):
+    viewIP = '10.17.0.13:443'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-3.openuav.us'
+    num_uavs='9'
+    return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 @csrf_exempt
 def console(request):
     viewIP = '10.17.0.13:443'
     viewDomainName='view-3.openuav.us'
     rosDomainName='ros-3.openuav.us'
-    num_uavs='6'
+    num_uav_str=''
+    measuresUp = 0
+    while num_uav_str=='':
+    	results = ansible.runner.Runner(pattern='all',module_name='command', module_args='./findVOcontainer.sh').run()
+    	num_uav_str=str(results['contacted']['172.19.0.1']['stdout'])
+	time.sleep(1)
+    num_uavs = int(num_uav_str)
+    while measuresUp==0:
+        results = ansible.runner.Runner(pattern='all',module_name='command', module_args='./testIfMeasureUp.sh').run()
+        measuresUp=int(str(results['contacted']['172.19.0.1']['stdout']))
+	time.sleep(1)
     return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+
+@csrf_exempt
+def beta_console(request):
+    viewIP = '10.17.0.13:443'
+    viewDomainName='view-3.openuav.us'
+    rosDomainName='ros-3.openuav.us'
+    num_uav_str=''
+    measuresUp = 0
+    while num_uav_str=='':
+        results = ansible.runner.Runner(pattern='all',module_name='command', module_args='./findVOcontainer.sh').run()
+        num_uav_str=str(results['contacted']['172.19.0.1']['stdout'])
+        time.sleep(1)
+    num_uavs = int(num_uav_str)
+    while measuresUp==0:
+        results = ansible.runner.Runner(pattern='all',module_name='command', module_args='./testIfMeasureUp.sh').run()
+        measuresUp=int(str(results['contacted']['172.19.0.1']['stdout']))
+        time.sleep(1)
+    return HttpResponse(render(request, 'webclient/beta_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 def dev_console(request):
     viewIP = '10.17.0.12:443'
     viewDomainName='view-2.openuav.us'
     rosDomainName='ros-2.openuav.us'
-    num_uavs='2'
+    num_uavs='9'
     return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 
@@ -474,10 +500,11 @@ def upload(request):
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
         resultsUpload = ansible.runner.Runner(pattern='all',module_name='unarchive', module_args={'src' : '/notebooks/agdss-1/' + filename,'dest' : '/home/jdas/playground'}).run()
-        resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation --name=openuav-'+uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+        resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v /home/jdas/playground/leader-follower/simulation:/simulation -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY --name=openuav-'+uuid_str+' --entrypoint "/simulation/run_this.sh" openuav-swarm-gym').run()
 	#time.sleep(1)
 	#return HttpResponse(str(resultsSimLaunch) + '<br/><a href="https://play.openuav.us/webclient/console">Wait 10 seconds for monitoring services to start, and click to open web viewer</a>')
-	return HttpResponse(render(request, 'webclient/console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName, 'playgroundResponse' : str(resultsSimLaunch)}))
+	return HttpResponse(render(request, 'webclient/beta_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName, 'playgroundResponse' : str(resultsSimLaunch)}))
+
 
     return render(request, 'webclient/upload.html')
 

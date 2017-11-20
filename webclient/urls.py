@@ -17,7 +17,8 @@ urlpatterns = [
     url(r'^dev_console$', views.dev_console, name='dev_console'),
     url(r'^hook$', views.hook, name='hook'),
     url(r'^dev_hook$', views.dev_hook, name='dev_hook'),
-
+    url(r'^unstable_console$', views.unstable_console, name='unstable_console'),
+    url(r'^beta_console', views.beta_console, name='beta_console'),
 
     #GET/POST URLs
 
