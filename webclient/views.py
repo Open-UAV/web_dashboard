@@ -429,10 +429,10 @@ def console(request):
     return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
 
 @csrf_exempt
-def beta_console(request):
-    viewIP = '10.17.0.13:443'
-    viewDomainName='view-3.openuav.us'
-    rosDomainName='ros-3.openuav.us'
+def ucla_console(request):
+    viewIP = '10.17.0.11:443'
+    viewDomainName='view-1.openuav.us'
+    rosDomainName='ros-1.openuav.us'
     num_uav_str=''
     measuresUp = 0
     while num_uav_str=='':
@@ -444,7 +444,8 @@ def beta_console(request):
         results = ansible.runner.Runner(pattern='all',module_name='command', module_args='./testIfMeasureUp.sh').run()
         measuresUp=int(str(results['contacted']['172.19.0.1']['stdout']))
         time.sleep(1)
-    return HttpResponse(render(request, 'webclient/beta_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+    return HttpResponse(render(request, 'webclient/dev_console.html', {'range' : range(int(num_uavs)), 'num_uavs' : num_uavs, 'viewDomainName' : viewDomainName, 'rosDomainName' : rosDomainName}))
+
 
 def dev_console(request):
     viewIP = '10.17.0.12:443'
@@ -470,7 +471,7 @@ def dev_hook(request):
     name = owner["login"]	
     folder_name = '/home/jdas/git-samples-' + str(name) + '-' + str(pushed_at)
     resultsPull = ansible.runner.Runner(pattern='all',module_name='git', module_args={'repo' : 'https://github.com/Open-UAV/samples', 'dest' : folder_name, 'update' : 'yes'}).run()
-    resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v '+ folder_name +'/leader-follower/simulation:/simulation --name=' + name + '-' + uuid_str+' openuav-swarm-functional /simulation/run_this.sh').run()
+    resultsSimLaunch = ansible.runner.Runner(pattern='all',module_name='command', module_args='/usr/bin/nvidia-docker run -dit --net=openuav-net --ip=10.17.0.13 -v '+ folder_name +'/leader-follower/simulation:/simulation -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY --name=openuav-'+uuid_str+' --entrypoint "/simulation/run_this.sh" openuav-swarm-gym').run()
     #resultScore = ansible.runner.Runner(pattern='all',module_name='stat',module_args={'path' : '/home/jdas/git-samples/leader-follower/simulation/outputs/average_score'}).run()
     return HttpResponse(resultsSimLaunch)
 @csrf_exempt
